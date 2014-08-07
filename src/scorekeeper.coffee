@@ -10,8 +10,6 @@ class ScoreKeeper
       if typeof @storage.last == "string"
         @storage.last = {}
 
-      robot.logger.debug "Plus Plus Data Loaded: " + JSON.stringify(@storage, null, 2)
-
   getUser: (user) ->
     @storage.scores[user] ||= 0
     user
