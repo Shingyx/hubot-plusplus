@@ -41,12 +41,18 @@ module.exports = (robot) ->
   ///i, (msg) ->
     # let's get our local vars in place
     [__, name, operator, reason] = msg.match
-    from = msg.message.user.name.toLowerCase()
+    from = msg.message.user.slack.profile.display_name_normalized.toLowerCase()
     room = msg.message.room
 
     # do some sanitizing
     reason = reason?.trim().toLowerCase()
     name = (name.replace /(^\s*@)|([,:\s]*$)/g, "").trim().toLowerCase() if name
+
+    # use the display_name of users
+    for mention in msg.message.mentions
+      if mention.info.slack.name == name
+        name = mention.info.slack.profile.display_name_normalized.toLowerCase()
+        break
 
     # check whether a name was specified. use MRU if not
     unless name?
