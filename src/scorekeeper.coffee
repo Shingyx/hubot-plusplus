@@ -10,6 +10,16 @@ class ScoreKeeper
       if typeof @storage.last == "string"
         @storage.last = {}
 
+  refreshBrain: () ->
+    @storage = @robot.brain.data.plusPlus ||= {
+      scores: {}
+      log: {}
+      reasons: {}
+      last: {}
+    }
+    if typeof @storage.last == "string"
+      @storage.last = {}
+
   getUser: (user) ->
     @storage.scores[user] ||= 0
     user
@@ -21,6 +31,7 @@ class ScoreKeeper
     [@storage.scores[user], @storage.reasons[user][reason] || ""]
 
   add: (user, from, room, reason) ->
+    @refreshBrain()
     if @validate(user, from)
       user = @getUser(user)
       @storage.scores[user]++
@@ -35,6 +46,7 @@ class ScoreKeeper
       [null, null]
 
   subtract: (user, from, room, reason) ->
+    @refreshBrain()
     if @validate(user, from)
       user = @getUser(user)
       @storage.scores[user]--
@@ -49,10 +61,12 @@ class ScoreKeeper
       [null, null]
 
   scoreForUser: (user) ->
+    @refreshBrain()
     user = @getUser(user)
     @storage.scores[user]
 
   reasonsForUser: (user) ->
+    @refreshBrain()
     user = @getUser(user)
     @storage.reasons[user]
 
@@ -93,6 +107,7 @@ class ScoreKeeper
     @storage.log.length
 
   top: (amount) ->
+    @refreshBrain()
     tops = []
 
     for name, score of @storage.scores
@@ -101,6 +116,7 @@ class ScoreKeeper
     tops.sort((a,b) -> b.score - a.score).slice(0,amount)
 
   bottom: (amount) ->
+    @refreshBrain()
     all = @top(@storage.scores.length)
     all.sort((a,b) -> b.score - a.score).reverse().slice(0,amount)
 
