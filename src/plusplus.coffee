@@ -50,7 +50,7 @@ module.exports = (robot) ->
 
     # use the display_name of users
     for mention in msg.message.mentions
-      if mention.info.slack.name == name
+      if mention.info?.slack.name == name
         name = mention.info.slack.profile.display_name_normalized.toLowerCase()
         break
 
