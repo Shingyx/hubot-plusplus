@@ -24,6 +24,9 @@ clark = require('clark')
 querystring = require('querystring')
 ScoreKeeper = require('./scorekeeper')
 
+# https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping
+escapeRegExp = (x) -> x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
 module.exports = (robot) ->
   scoreKeeper = new ScoreKeeper(robot)
 
@@ -48,11 +51,23 @@ module.exports = (robot) ->
     reason = reason?.trim().toLowerCase()
     name = (name.replace /(^\s*@)|([,:\s]*$)/g, "").trim().toLowerCase() if name
 
-    # use the display_name of users
+    # use the display_name of users instead of usernames
     for mention in msg.message.mentions
-      if mention.info?.slack.name == name
-        name = mention.info.slack.profile.display_name_normalized.toLowerCase()
-        break
+      if !mention.info
+        continue
+
+      username = mention.info.slack.name.toLowerCase()
+      display_name = mention.info.slack.profile.display_name_normalized.toLowerCase()
+
+      if username == display_name
+        continue
+
+      # for the user getting the points
+      if username == name
+        name = display_name
+
+      # for any other mentions in the reason
+      reason = reason?.replace(new RegExp(escapeRegExp('@' + username), 'g'), '@' + display_name)
 
     # check whether a name was specified. use MRU if not
     unless name?
